@@ -16,7 +16,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler {
 
     //Variables
     private RecyclerView mRecyclerView;
@@ -27,6 +27,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        movieList = new ArrayList<>();
 
         //Refer the recycler view from the layout
         mRecyclerView = findViewById(R.id.recycler_id);
@@ -53,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "Success", Toast.LENGTH_SHORT).show();
                 Log.d("RESPONSE", String.valueOf(response.body().getMovieList().size()));
 
-                mAdapter = new MovieAdapter(response.body().getMovieList());
+                mAdapter = new MovieAdapter(response.body().getMovieList(), MainActivity.this);
                 mRecyclerView.setAdapter(mAdapter);
             }
 
@@ -63,6 +65,11 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "Failure", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    @Override
+    public void onClick(int id) {
+        Log.d("ID", String.valueOf(id));
     }
 
     private void fetchData(boolean testCondition){
@@ -79,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
                     //The API fetch was successful
                     movieList = new ArrayList<>();
                     movieList = response.body().getMovieList();
-                    mAdapter = new MovieAdapter(movieList);
+                    mAdapter = new MovieAdapter(movieList, MainActivity.this);
                     mRecyclerView.setAdapter(mAdapter);
                 }
 
@@ -104,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
                     //The API fetch was successful
                     movieList = new ArrayList<>();
                     movieList = response.body().getMovieList();
-                    mAdapter = new MovieAdapter(movieList);
+                    mAdapter = new MovieAdapter(movieList, MainActivity.this);
                     mRecyclerView.setAdapter(mAdapter);
                 }
 

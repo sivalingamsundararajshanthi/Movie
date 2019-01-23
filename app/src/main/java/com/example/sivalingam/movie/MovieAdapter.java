@@ -26,13 +26,25 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
     //List which has the list of Movie objects
     private List<Movie> movieList;
 
+    //handler for the particular view
+    private final MovieAdapterOnClickHandler handler;
+
+    /**
+     * Interface to implement Click handling
+     */
+    public interface MovieAdapterOnClickHandler {
+        void onClick(int id);
+    }
+
     /**
      *
      * @param movieList
      *
-     * This constructor is used to set the movieList and also to refresh the recycler view when the data set changes
+     * This constructor is used to set the movieList, also to refresh the recycler view when the data set changes
+     * and also sets the onClick handler
      */
-    public MovieAdapter(List<Movie> movieList){
+    public MovieAdapter(List<Movie> movieList, MovieAdapterOnClickHandler handler){
+        this.handler = handler;
         this.movieList = movieList;
         notifyDataSetChanged();
     }
@@ -107,7 +119,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
     /**
      * This inner class extends from the view holder class and is used to reference the layout item.
      */
-    public class MovieAdapterViewHolder extends RecyclerView.ViewHolder {
+    public class MovieAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         //The image button in the layout
         public final ImageButton mImageButton;
@@ -119,6 +131,22 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
 
             //Refer the image button from the layout
             mImageButton = itemView.findViewById(R.id.image_btn_id);
+            itemView.setOnClickListener(this);
+        }
+
+        /**
+         *
+         * @param v
+         *
+         * The overriden method is used to handle the item click. This gets the Movie object from the particular
+         * position and returns it. From this the id can be obtained for a movie.
+         *
+         */
+        @Override
+        public void onClick(View v) {
+            int adapterPosition = getAdapterPosition();
+            Movie movie = movieList.get(adapterPosition);
+            handler.onClick(movie.getId());
         }
     }
 }
