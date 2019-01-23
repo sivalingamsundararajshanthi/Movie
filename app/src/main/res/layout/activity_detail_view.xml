@@ -34,7 +34,7 @@
         <ImageView
             android:id="@+id/movie_poster_id"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="100dp"
             android:layout_marginLeft="30dp"
             android:layout_marginTop="10dp"
             tools:background="@drawable/ic_launcher_background"

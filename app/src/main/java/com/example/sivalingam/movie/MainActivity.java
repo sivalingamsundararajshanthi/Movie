@@ -1,5 +1,6 @@
 package com.example.sivalingam.movie;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -70,6 +71,10 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     @Override
     public void onClick(int id) {
         Log.d("ID", String.valueOf(id));
+
+        Intent intent = new Intent(MainActivity.this, DetailView.class);
+        intent.putExtra("MOVIEOBJECTPOSITION", movieList.get(id));
+        startActivity(intent);
     }
 
     private void fetchData(boolean testCondition){
