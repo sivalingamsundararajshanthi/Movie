@@ -1,6 +1,7 @@
 package com.example.sivalingam.movie;
 
 import android.content.Intent;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -8,8 +9,12 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +28,9 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     private RecyclerView mRecyclerView;
     private MovieAdapter mAdapter;
     private List<Movie> movieList;
+    private ImageView imageView;
+    private TextView textView;
+    private SwipeRefreshLayout layout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +41,9 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
         //Refer the recycler view from the layout
         mRecyclerView = findViewById(R.id.recycler_id);
+        imageView = findViewById(R.id.error_int_id);
+        textView = findViewById(R.id.error_message_id);
+        layout = findViewById(R.id.refresh_id);
 
         //Grid layout manager
         GridLayoutManager manager = new GridLayoutManager(this, 2, 1, false);
@@ -42,41 +53,57 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
         mRecyclerView.setHasFixedSize(true);
 
-        fetchData(true);
+        //Check if there is internet connectivity
+        if(isOnline()){
+            //We hav internet connection
+            imageView.setVisibility(View.INVISIBLE);
+            textView.setVisibility(View.INVISIBLE);
+            fetchData(true);
+        }
+        else{
+            //We dont dave internet connection
+            mRecyclerView.setVisibility(View.INVISIBLE);
+        }
 
-        //Set the Retrofit instance and fetch the data
-        GetDataService service = RetrofitClientInstance.getRetrofitInstance().create(GetDataService.class);
-
-        //This gets information from the API
-        retrofit2.Call<OuterClass> call = service.getPopularMovies();
-        call.enqueue(new Callback<OuterClass>() {
+        //SwipeRefreshListener which again checks if internet is available or not
+        layout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
-            public void onResponse(Call<OuterClass> call, Response<OuterClass> response) {
-                //The API fetch was successful
-                Toast.makeText(MainActivity.this, "Success", Toast.LENGTH_SHORT).show();
-                Log.d("RESPONSE", String.valueOf(response.body().getMovieList().size()));
-
-                mAdapter = new MovieAdapter(response.body().getMovieList(), MainActivity.this);
-                mRecyclerView.setAdapter(mAdapter);
-            }
-
-            @Override
-            public void onFailure(Call<OuterClass> call, Throwable t) {
-                //The API fetch failed
-                Toast.makeText(MainActivity.this, "Failure", Toast.LENGTH_SHORT).show();
+            public void onRefresh() {
+                if(isOnline()){
+                    layout.setRefreshing(false);
+                    mRecyclerView.setVisibility(View.VISIBLE);
+                    imageView.setVisibility(View.INVISIBLE);
+                    textView.setVisibility(View.INVISIBLE);
+                    fetchData(true);
+                } else {
+                    layout.setRefreshing(false);
+                    mRecyclerView.setVisibility(View.INVISIBLE);
+                    imageView.setVisibility(View.VISIBLE);
+                    textView.setVisibility(View.VISIBLE);
+                }
             }
         });
     }
 
+    /**
+     *
+     * @param id
+     *
+     * This overriden method is used to transition to the new activity when a movie is clicked.
+     */
     @Override
     public void onClick(int id) {
-        Log.d("ID", String.valueOf(id));
-
         Intent intent = new Intent(MainActivity.this, DetailView.class);
         intent.putExtra("MOVIEOBJECTPOSITION", movieList.get(id));
         startActivity(intent);
     }
 
+    /**
+     *
+     * @param testCondition
+     *
+     * This function is used to fetch the data from the API using the Retrofit library.
+     */
     private void fetchData(boolean testCondition){
         //If testCondition is true fetch popular movies
         if(testCondition){
@@ -166,6 +193,25 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     *
+     * @return
+     *
+     * This function returns true if internet is available or false if internet is not available
+     */
+    public boolean isOnline() {
+        Runtime runtime = Runtime.getRuntime();
+        try {
+            Process ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8");
+            int     exitValue = ipProcess.waitFor();
+            return (exitValue == 0);
+        }
+        catch (IOException e)          { e.printStackTrace(); }
+        catch (InterruptedException e) { e.printStackTrace(); }
+
+        return false;
     }
 }
 

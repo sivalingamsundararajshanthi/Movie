@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -7,11 +7,34 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/recycler_id"
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/refresh_id"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-    </android.support.v7.widget.RecyclerView>
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recycler_id"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-</FrameLayout>
+        </android.support.v7.widget.RecyclerView>
+
+    </android.support.v4.widget.SwipeRefreshLayout>
+
+    <ImageView
+        android:id="@+id/error_int_id"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:background="@drawable/ic_action_movie_error"
+        android:layout_marginTop="190dp"
+        android:layout_marginLeft="150dp"/>
+
+    <TextView
+        android:id="@+id/error_message_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/error_message"
+        android:layout_marginLeft="110dp"
+        android:layout_marginTop="300dp"/>
+
+</RelativeLayout>
