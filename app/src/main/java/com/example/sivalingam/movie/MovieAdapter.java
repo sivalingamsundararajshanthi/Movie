@@ -20,9 +20,6 @@ import java.util.List;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapterViewHolder> {
 
-    //The URL to fetch the image
-    private String movieUrl = "http://image.tmdb.org/t/p/w185";
-
     //List which has the list of Movie objects
     private List<Movie> movieList;
 
@@ -92,6 +89,8 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
             String url = movieList.get(i).getPoster_path();
 
             //Parse it into an URI with parameters
+            //The URL to fetch the image
+            String movieUrl = "http://image.tmdb.org/t/p/w185";
             Uri uri = Uri.parse(movieUrl).buildUpon()
                     .appendEncodedPath(url)
                     .build();
@@ -122,10 +121,10 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
     public class MovieAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         //The image button in the layout
-        public final ImageButton mImageButton;
+        private final ImageButton mImageButton;
 
         //This constructor is used to refer the image button from the layout
-        public MovieAdapterViewHolder(@NonNull View itemView) {
+        private MovieAdapterViewHolder(@NonNull View itemView) {
             //Passing the view to the super constructor
             super(itemView);
 

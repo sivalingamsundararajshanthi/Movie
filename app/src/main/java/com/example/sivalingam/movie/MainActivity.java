@@ -227,7 +227,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
      *
      * This function returns true if internet is available or false if internet is not available
      */
-    public boolean isOnline() {
+    private boolean isOnline() {
         Runtime runtime = Runtime.getRuntime();
         try {
             Process ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8");

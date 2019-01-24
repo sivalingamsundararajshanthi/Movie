@@ -7,7 +7,6 @@
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".DetailActivity"
-    tools:showIn="@layout/activity_detail"
     android:orientation="vertical">
 
     <LinearLayout
@@ -34,7 +33,7 @@
         <ImageView
             android:id="@+id/movie_poster_id"
             android:layout_width="0dp"
-            android:layout_height="100dp"
+            android:layout_height="200dp"
             android:layout_marginLeft="30dp"
             android:layout_marginTop="10dp"
             tools:background="@drawable/ic_launcher_background"
@@ -55,15 +54,6 @@
                 tools:text="2015"
                 android:layout_marginLeft="30dp"
                 android:textSize="25sp"/>
-
-            <TextView
-                android:id="@+id/min_id"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="30dp"
-                android:textSize="25sp"
-                android:layout_marginTop="10dp"
-                tools:text="120min"/>
 
             <TextView
                 android:id="@+id/rating_id"
