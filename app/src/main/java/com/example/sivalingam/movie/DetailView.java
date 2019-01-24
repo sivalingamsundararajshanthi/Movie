@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -28,6 +29,10 @@ public class DetailView extends AppCompatActivity {
         rating = findViewById(R.id.rating_id);
         plot = findViewById(R.id.synopsis_id);
         imagePoster = findViewById(R.id.movie_poster_id);
+
+        //Enabling the action bar and the back button
+        getSupportActionBar().show();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         Intent intent = getIntent();
 
@@ -53,5 +58,16 @@ public class DetailView extends AppCompatActivity {
                 Log.d("ERROR", e.getLocalizedMessage());
             }
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }

@@ -31,11 +31,14 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     private ImageView imageView;
     private TextView textView;
     private SwipeRefreshLayout layout;
+    private boolean testForSort;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        testForSort = true;
 
         movieList = new ArrayList<>();
 
@@ -63,6 +66,8 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         else{
             //We dont dave internet connection
             mRecyclerView.setVisibility(View.INVISIBLE);
+            imageView.setVisibility(View.VISIBLE);
+            textView.setVisibility(View.VISIBLE);
         }
 
         //SwipeRefreshListener which again checks if internet is available or not
@@ -74,7 +79,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
                     mRecyclerView.setVisibility(View.VISIBLE);
                     imageView.setVisibility(View.INVISIBLE);
                     textView.setVisibility(View.INVISIBLE);
-                    fetchData(true);
+                    fetchData(testForSort);
                 } else {
                     layout.setRefreshing(false);
                     mRecyclerView.setVisibility(View.INVISIBLE);
@@ -183,13 +188,34 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         switch (id){
             case R.id.action_popularity:
                 item.setChecked(true);
-                fetchData(true);
+                testForSort = true;
+                if(isOnline()){
+                    mRecyclerView.setVisibility(View.VISIBLE);
+                    imageView.setVisibility(View.INVISIBLE);
+                    textView.setVisibility(View.INVISIBLE);
+                    fetchData(true);
+                } else {
+                    mRecyclerView.setVisibility(View.INVISIBLE);
+                    imageView.setVisibility(View.VISIBLE);
+                    textView.setVisibility(View.VISIBLE);
+                }
+
                 return true;
 
             case R.id.action_rating:
                 item.setChecked(true);
-                fetchData(false);
-                return false;
+                testForSort = false;
+                if(isOnline()){
+                    mRecyclerView.setVisibility(View.VISIBLE);
+                    imageView.setVisibility(View.INVISIBLE);
+                    textView.setVisibility(View.INVISIBLE);
+                    fetchData(false);
+                } else {
+                    mRecyclerView.setVisibility(View.INVISIBLE);
+                    imageView.setVisibility(View.VISIBLE);
+                    textView.setVisibility(View.VISIBLE);
+                }
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
