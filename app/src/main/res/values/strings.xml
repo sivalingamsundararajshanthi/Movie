@@ -11,4 +11,6 @@
     <string name="rating">Rating not available</string>
     <string name="plot">Plot not available</string>
     <string name="year">Year not available</string>
+    <string name="popular">Popular movies</string>
+    <string name="top">Top rated movies</string>
 </resources>

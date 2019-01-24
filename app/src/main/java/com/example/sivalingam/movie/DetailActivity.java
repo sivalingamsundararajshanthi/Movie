@@ -1,5 +1,9 @@
 package com.example.sivalingam.movie;
 
+/**
+ * This class is not used
+ */
+
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;

@@ -2,6 +2,7 @@ package com.example.sivalingam.movie;
 
 import android.content.Intent;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -58,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
         //Check if there is internet connectivity
         if(isOnline()){
-            //We hav internet connection
+            //We have internet connection
             imageView.setVisibility(View.INVISIBLE);
             textView.setVisibility(View.INVISIBLE);
             fetchData(true);
@@ -112,6 +113,8 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     private void fetchData(boolean testCondition){
         //If testCondition is true fetch popular movies
         if(testCondition){
+            ActionBar bar = getSupportActionBar();
+            bar.setTitle(R.string.popular);
             //Set the Retrofit instance
             GetDataService service = RetrofitClientInstance.getRetrofitInstance().create(GetDataService.class);
 
@@ -137,6 +140,8 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
         //If testCondition is false fetch the top rated movies
         else {
+            ActionBar bar = getSupportActionBar();
+            bar.setTitle(R.string.top);
             //Set the Retrofit instance
             GetDataService service = RetrofitClientInstance.getRetrofitInstance().create(GetDataService.class);
 

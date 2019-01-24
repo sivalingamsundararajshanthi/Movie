@@ -1,7 +1,8 @@
 package com.example.sivalingam.movie;
 
 /**
- * This class has all the fields inside the results array in the API.
+ * This class has all the fields inside the results array in the API. This class has been made to implement parcelable so that
+ * objects of this class can be passes from one activity to another.
  */
 
 import android.os.Parcel;
