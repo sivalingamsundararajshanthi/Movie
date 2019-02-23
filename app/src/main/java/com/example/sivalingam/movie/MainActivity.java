@@ -34,6 +34,9 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     private SwipeRefreshLayout layout;
     private boolean testForSort;
 
+    //AppDatabase variable
+    private AppDatabase mAppDatabase;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,6 +51,9 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         imageView = findViewById(R.id.error_int_id);
         textView = findViewById(R.id.error_message_id);
         layout = findViewById(R.id.refresh_id);
+
+        //Initialize the AppDatabase instance
+        mAppDatabase = AppDatabase.getsInstance(getApplicationContext());
 
         //Grid layout manager
         GridLayoutManager manager = new GridLayoutManager(this, 2, 1, false);
@@ -89,6 +95,42 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
                 }
             }
         });
+
+        Log.d("LIFECYCLECALLBACK", "ONCREATE");
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        Log.d("LIFECYCLECALLBACK", "ONSTART");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d("LIFECYCLECALLBACK", "ONRESUME");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        Log.d("LIFECYCLECALLBACK", "ONPAUSE");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        Log.d("LIFECYCLECALLBACK", "ONSTOP");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        Log.d("LIFECYCLECALLBACK", "ONDESTROY");
     }
 
     /**
@@ -115,6 +157,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         if(testCondition){
             ActionBar bar = getSupportActionBar();
             bar.setTitle(R.string.popular);
+
             //Set the Retrofit instance
             GetDataService service = RetrofitClientInstance.getRetrofitInstance().create(GetDataService.class);
 
@@ -124,10 +167,14 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
                 @Override
                 public void onResponse(Call<OuterClass> call, Response<OuterClass> response) {
                     //The API fetch was successful
-                    movieList = new ArrayList<>();
-                    movieList = response.body().getMovieList();
-                    mAdapter = new MovieAdapter(movieList, MainActivity.this);
-                    mRecyclerView.setAdapter(mAdapter);
+                    try{
+                        movieList = new ArrayList<>();
+                        movieList = response.body().getMovieList();
+                        mAdapter = new MovieAdapter(movieList, MainActivity.this);
+                        mRecyclerView.setAdapter(mAdapter);
+                    } catch(NullPointerException e){
+                        Toast.makeText(MainActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                    }
                 }
 
                 @Override
@@ -139,7 +186,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         }
 
         //If testCondition is false fetch the top rated movies
-        else {
+        else if(!testCondition){
             ActionBar bar = getSupportActionBar();
             bar.setTitle(R.string.top);
             //Set the Retrofit instance
@@ -221,6 +268,15 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
                     textView.setVisibility(View.VISIBLE);
                 }
                 return true;
+
+            case R.id.fav_movies:
+                item.setChecked(true);
+                movieList.clear();
+
+                //fetch all favourite movies and display
+                movieList = mAppDatabase.movieDAO().getAllMovies();
+                mAdapter = new MovieAdapter(movieList, MainActivity.this);
+                mRecyclerView.setAdapter(mAdapter);
         }
 
         return super.onOptionsItemSelected(item);

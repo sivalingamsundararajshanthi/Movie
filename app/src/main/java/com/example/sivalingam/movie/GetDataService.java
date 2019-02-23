@@ -10,10 +10,10 @@ import retrofit2.http.GET;
 public interface GetDataService {
 
     //This interface method is used to fetch the popular movies
-    @GET("/3/movie/popular?api_key=INSERTKEYHERE")
+    @GET("/3/movie/popular?api_key=")
     Call<OuterClass> getPopularMovies();
 
     //This interface method fetches the top rated movies
-    @GET("/3/movie/top_rated?api_key=INSERTKEYHERE")
+    @GET("/3/movie/top_rated?api_key=")
     Call<OuterClass> getRatingMovies();
 }

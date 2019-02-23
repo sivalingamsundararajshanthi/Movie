@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -62,9 +63,19 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="30dp"
+                    android:layout_marginStart="30dp"
                     android:layout_marginTop="10dp"
                     android:textSize="15sp"
                     tools:text="8.1/10" />
+
+                <Button
+                    android:id="@+id/fav_btn_id"
+                    android:layout_width="100dp"
+                    android:layout_height="60dp"
+                    android:text="@string/fav"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginLeft="10dp"/>
             </LinearLayout>
 
 

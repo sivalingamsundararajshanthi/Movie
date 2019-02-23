@@ -5,6 +5,9 @@ package com.example.sivalingam.movie;
  * objects of this class can be passes from one activity to another.
  */
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -12,7 +15,10 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
+@Entity(tableName = "movie")
 public class Movie implements Parcelable {
+
+    @PrimaryKey(autoGenerate = false)
     @SerializedName("vote_count")
     private int vote_count;
 
@@ -40,6 +46,7 @@ public class Movie implements Parcelable {
     @SerializedName("original_title")
     private String original_title;
 
+    @Ignore
     @SerializedName("genre_ids")
     private List<Integer> genre_ids;
 
@@ -55,6 +62,9 @@ public class Movie implements Parcelable {
     @SerializedName("release_date")
     private String release_date;
 
+    private boolean isFav;
+
+    @Ignore
     public Movie(int vote_count, int id, boolean video, double vote_average, String title, double popularity,
                  String poster_path, String original_language, String original_title, List<Integer> genre_ids,
                  String backdrop_path, boolean adult, String overview, String release_date) {
@@ -72,6 +82,26 @@ public class Movie implements Parcelable {
         this.adult = adult;
         this.overview = overview;
         this.release_date = release_date;
+        this.isFav = false;
+    }
+
+    public Movie(int vote_count, int id, boolean video, double vote_average, String title, double popularity,
+                 String poster_path, String original_language, String original_title, String backdrop_path,
+                 boolean adult, String overview, String release_date) {
+        this.vote_count = vote_count;
+        this.id = id;
+        this.video = video;
+        this.vote_average = vote_average;
+        this.title = title;
+        this.popularity = popularity;
+        this.poster_path = poster_path;
+        this.original_language = original_language;
+        this.original_title = original_title;
+        this.backdrop_path = backdrop_path;
+        this.adult = adult;
+        this.overview = overview;
+        this.release_date = release_date;
+        this.isFav = false;
     }
 
     /**
@@ -92,6 +122,7 @@ public class Movie implements Parcelable {
         adult = in.readByte() != 0;
         overview = in.readString();
         release_date = in.readString();
+        isFav = in.readByte() != 0;
     }
 
     /**
@@ -114,6 +145,14 @@ public class Movie implements Parcelable {
             return new Movie[size];
         }
     };
+
+    public boolean isFav() {
+        return isFav;
+    }
+
+    public void setFav(boolean fav) {
+        isFav = fav;
+    }
 
     public int getVote_count() {
         return vote_count;
@@ -256,6 +295,7 @@ public class Movie implements Parcelable {
         dest.writeByte((byte) (adult ? 1 : 0));
         dest.writeString(overview);
         dest.writeString(release_date);
+        dest.writeByte((byte) (isFav ? 1 : 0));
     }
 }
 

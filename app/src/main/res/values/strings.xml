@@ -13,4 +13,7 @@
     <string name="year">Year not available</string>
     <string name="popular">Popular movies</string>
     <string name="top">Top rated movies</string>
+    <string name="fav">Make Favourite</string>
+    <string name="fav_movies">Favourite Movies</string>
+    <string name="rem_fav">Remove Favourite</string>
 </resources>

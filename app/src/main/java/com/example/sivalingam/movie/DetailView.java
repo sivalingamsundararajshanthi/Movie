@@ -7,12 +7,20 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
 public class DetailView extends AppCompatActivity {
+
+    //Member variable for the database
+    private AppDatabase mAppdatabase;
+
+    private Movie movie;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,6 +33,9 @@ public class DetailView extends AppCompatActivity {
         TextView rating = findViewById(R.id.rating_id);
         TextView plot = findViewById(R.id.synopsis_id);
         ImageView imagePoster = findViewById(R.id.movie_poster_id);
+        Button mFavButton = findViewById(R.id.fav_btn_id);
+
+        mAppdatabase = AppDatabase.getsInstance(getApplicationContext());
 
         //Enabling the action bar and the back button
         getSupportActionBar().show();
@@ -37,7 +48,7 @@ public class DetailView extends AppCompatActivity {
         if (intent != null) {
 
             //get the movie object from the main activity
-            Movie movie = intent.getParcelableExtra("MOVIEOBJECTPOSITION");
+            movie = intent.getParcelableExtra("MOVIEOBJECTPOSITION");
 
             try {
                 //Setting the fields with information from the object
@@ -65,11 +76,49 @@ public class DetailView extends AppCompatActivity {
                 Picasso.get().load(uri).placeholder(R.drawable.ic_action_movie_error)
                         .error(R.drawable.ic_action_movie_error).into(imagePoster);
 
+                Log.d("FAV", String.valueOf(movie.isFav()));
+
+                if(movie.isFav()){
+                    Log.d("FAV", "movie is fav");
+                    mFavButton.setText(getString(R.string.rem_fav));
+                }
+
 
             } catch (NullPointerException e) {
                 Log.d("ERROR", e.getLocalizedMessage());
             }
         }
+
+        //Onclicklistener for "Make Favourite" button or "Remove Favourite" Button
+        mFavButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                //If movie object is not null
+                if(movie != null){
+
+                    Log.d("FAV", "movie is not null");
+
+                    //If movie is not favourite
+                    if(!movie.isFav()){
+
+                        Log.d("FAV", "mov is fav true");
+                        movie.setFav(true);
+                        //Insert movie object in to room
+                        mAppdatabase.movieDAO().insert(movie);
+                    }
+
+                    //If movie is favourite
+                    else {
+
+                        Log.d("FAV", "mov is fav false");
+                        mAppdatabase.movieDAO().deleteTask(movie);
+                    }
+                } else {
+                    Toast.makeText(DetailView.this, "Error in movie object", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     /**
