@@ -1,6 +1,9 @@
 package com.example.sivalingam.movie;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
 import android.content.Intent;
+import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -271,12 +274,20 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
             case R.id.fav_movies:
                 item.setChecked(true);
-                movieList.clear();
+                //movieList.clear();
 
                 //fetch all favourite movies and display
-                movieList = mAppDatabase.movieDAO().getAllMovies();
-                mAdapter = new MovieAdapter(movieList, MainActivity.this);
-                mRecyclerView.setAdapter(mAdapter);
+                LiveData<List<Movie>> movies = mAppDatabase.movieDAO().getAllMovies();
+                movies.observe(this, new Observer<List<Movie>>() {
+                    @Override
+                    public void onChanged(@Nullable List<Movie> movies) {
+                        Log.d("LIVEDATA", "CALLED");
+                        movieList.clear();
+                        movieList = movies;
+                        mAdapter = new MovieAdapter(movieList, MainActivity.this);
+                        mRecyclerView.setAdapter(mAdapter);
+                    }
+                });
         }
 
         return super.onOptionsItemSelected(item);

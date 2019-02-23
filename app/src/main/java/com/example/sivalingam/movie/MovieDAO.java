@@ -1,5 +1,6 @@
 package com.example.sivalingam.movie;
 
+import android.arch.lifecycle.LiveData;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
@@ -11,7 +12,7 @@ import java.util.List;
 public interface MovieDAO {
 
     @Query("SELECT * FROM movie")
-    List<Movie> getAllMovies();
+    LiveData<List<Movie>> getAllMovies();
 
     @Insert
     void insert(Movie movie);
