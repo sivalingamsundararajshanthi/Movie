@@ -106,6 +106,7 @@ public class DetailView extends AppCompatActivity {
                         movie.setFav(true);
                         //Insert movie object in to room
                         mAppdatabase.movieDAO().insert(movie);
+                        finish();
                     }
 
                     //If movie is favourite

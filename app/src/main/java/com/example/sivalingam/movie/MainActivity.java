@@ -2,6 +2,8 @@ package com.example.sivalingam.movie;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProvider;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -66,18 +68,29 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
         mRecyclerView.setHasFixedSize(true);
 
-        //Check if there is internet connectivity
-        if(isOnline()){
-            //We have internet connection
-            imageView.setVisibility(View.INVISIBLE);
-            textView.setVisibility(View.INVISIBLE);
-            fetchData(true);
-        }
-        else{
-            //We dont dave internet connection
-            mRecyclerView.setVisibility(View.INVISIBLE);
-            imageView.setVisibility(View.VISIBLE);
-            textView.setVisibility(View.VISIBLE);
+        if(savedInstanceState != null){
+            if(savedInstanceState.containsKey("MOVIE")){
+                imageView.setVisibility(View.INVISIBLE);
+                textView.setVisibility(View.INVISIBLE);
+                movieList.clear();
+                movieList = savedInstanceState.<Movie>getParcelableArrayList("MOVIE");
+                mAdapter = new MovieAdapter(movieList, this);
+                mRecyclerView.setAdapter(mAdapter);
+            }
+        } else {
+            //Check if there is internet connectivity
+            if(isOnline()){
+                //We have internet connection
+                imageView.setVisibility(View.INVISIBLE);
+                textView.setVisibility(View.INVISIBLE);
+                fetchData(true);
+            }
+            else{
+                //We dont dave internet connection
+                mRecyclerView.setVisibility(View.INVISIBLE);
+                imageView.setVisibility(View.VISIBLE);
+                textView.setVisibility(View.VISIBLE);
+            }
         }
 
         //SwipeRefreshListener which again checks if internet is available or not
@@ -103,6 +116,14 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putParcelableArrayList("MOVIE", new ArrayList<>(movieList));
+
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
 
@@ -113,6 +134,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     protected void onResume() {
         super.onResume();
         Log.d("LIFECYCLECALLBACK", "ONRESUME");
+
     }
 
     @Override
@@ -189,7 +211,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         }
 
         //If testCondition is false fetch the top rated movies
-        else if(!testCondition){
+        else {
             ActionBar bar = getSupportActionBar();
             bar.setTitle(R.string.top);
             //Set the Retrofit instance
@@ -274,11 +296,9 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
             case R.id.fav_movies:
                 item.setChecked(true);
-                //movieList.clear();
 
-                //fetch all favourite movies and display
-                LiveData<List<Movie>> movies = mAppDatabase.movieDAO().getAllMovies();
-                movies.observe(this, new Observer<List<Movie>>() {
+                MainViewModel mainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+                mainViewModel.getMovies().observe(this, new Observer<List<Movie>>() {
                     @Override
                     public void onChanged(@Nullable List<Movie> movies) {
                         Log.d("LIVEDATA", "CALLED");
@@ -288,6 +308,8 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
                         mRecyclerView.setAdapter(mAdapter);
                     }
                 });
+
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
