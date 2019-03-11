@@ -18,10 +18,10 @@ import java.util.List;
 @Entity(tableName = "movie")
 public class Movie implements Parcelable {
 
-    @PrimaryKey(autoGenerate = false)
     @SerializedName("vote_count")
     private int vote_count;
 
+    @PrimaryKey(autoGenerate = false)
     @SerializedName("id")
     private int id;
 

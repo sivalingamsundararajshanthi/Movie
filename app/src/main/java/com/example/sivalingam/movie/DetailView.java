@@ -1,8 +1,13 @@
 package com.example.sivalingam.movie;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.database.sqlite.SQLiteConstraintException;
 import android.net.Uri;
+import android.os.PersistableBundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,10 +22,19 @@ import com.squareup.picasso.Picasso;
 
 public class DetailView extends AppCompatActivity {
 
+    private final String BUNDLE_STRING = "MOVIEOBJECT";
+    private final String BUNDLE_BOOLEAN = "BOOLEANDB";
+
     //Member variable for the database
     private AppDatabase mAppdatabase;
 
     private Movie movie;
+
+    private boolean inDb;
+
+    TextView name, year, rating, plot;
+    ImageView imagePoster;
+    Button mFavButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,12 +42,12 @@ public class DetailView extends AppCompatActivity {
         setContentView(R.layout.activity_detail_view);
 
         //variables
-        TextView name = findViewById(R.id.moview_name_id);
-        TextView year = findViewById(R.id.year_id);
-        TextView rating = findViewById(R.id.rating_id);
-        TextView plot = findViewById(R.id.synopsis_id);
-        ImageView imagePoster = findViewById(R.id.movie_poster_id);
-        Button mFavButton = findViewById(R.id.fav_btn_id);
+        name = findViewById(R.id.moview_name_id);
+        year = findViewById(R.id.year_id);
+        rating = findViewById(R.id.rating_id);
+        plot = findViewById(R.id.synopsis_id);
+        imagePoster = findViewById(R.id.movie_poster_id);
+        mFavButton = findViewById(R.id.fav_btn_id);
 
         mAppdatabase = AppDatabase.getsInstance(getApplicationContext());
 
@@ -41,51 +55,45 @@ public class DetailView extends AppCompatActivity {
         getSupportActionBar().show();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        //Getting the intent
-        Intent intent = getIntent();
+        if(savedInstanceState != null){
 
-        //If the intent is not null
-        if (intent != null) {
+            Log.d("bothtrue", "saved");
 
-            //get the movie object from the main activity
-            movie = intent.getParcelableExtra("MOVIEOBJECTPOSITION");
+            if(savedInstanceState.containsKey(BUNDLE_STRING)){
 
-            try {
-                //Setting the fields with information from the object
-                name.setText(movie.getTitle());
-                String[] splitString = movie.getRelease_date().split("-");
-                year.setText(splitString[0]);
-                Resources resources = getResources();
-                String ratingString = "/10";
-                String builder = String.valueOf(movie.getVote_average()) + ratingString;
-                rating.setText(builder);
-                if(movie.getOverview().equals(""))
-                    plot.setText(R.string.plot);
-                else
-                    plot.setText(movie.getOverview());
+                Log.d("bothtrue", "bothtrue");
 
-                //URL for fetching the image
-                String url = "http://image.tmdb.org/t/p/w185";
+                try{
+                    movie = savedInstanceState.getParcelable(BUNDLE_STRING);
+                    populateUI(movie,
+                            savedInstanceState.getBoolean(BUNDLE_BOOLEAN));
 
-                //Parse the URL into an URI with parameters
-                Uri uri = Uri.parse(url).buildUpon()
-                        .appendEncodedPath(movie.getPoster_path())
-                        .build();
+                } catch (NullPointerException npe) {
 
-                //Use Picasso to fetch the image
-                Picasso.get().load(uri).placeholder(R.drawable.ic_action_movie_error)
-                        .error(R.drawable.ic_action_movie_error).into(imagePoster);
+                    Log.d("ISNULL", "NULL");
 
-                Log.d("FAV", String.valueOf(movie.isFav()));
+                }
+            }
+        } else {
+            //Getting the intent
+            Intent intent = getIntent();
 
-                if(movie.isFav()){
-                    Log.d("FAV", "movie is fav");
-                    mFavButton.setText(getString(R.string.rem_fav));
+            //If the intent is not null
+            if (intent != null) {
+
+                //get the movie object from the main activity
+                movie = intent.getParcelableExtra("MOVIEOBJECTPOSITION");
+
+                if(mAppdatabase.movieDAO().loadMovieById(movie.getId()) != null){
+                    inDb = true;
+                    movie.setFav(true);
                 }
 
-
-            } catch (NullPointerException e) {
-                Log.d("ERROR", e.getLocalizedMessage());
+                try {
+                    populateUI(movie, inDb);
+                } catch (NullPointerException e) {
+                    Log.d("ERROR", e.getLocalizedMessage());
+                }
             }
         }
 
@@ -97,29 +105,69 @@ public class DetailView extends AppCompatActivity {
                 //If movie object is not null
                 if(movie != null){
 
-                    Log.d("FAV", "movie is not null");
-
                     //If movie is not favourite
-                    if(!movie.isFav()){
-
-                        Log.d("FAV", "mov is fav true");
+                    if(mAppdatabase.movieDAO().loadMovieById(movie.getId()) == null){
                         movie.setFav(true);
-                        //Insert movie object in to room
-                        mAppdatabase.movieDAO().insert(movie);
-                        finish();
+
+                        try{
+                            mAppdatabase.movieDAO().insert(movie);
+                            finish();
+                        } catch(SQLiteConstraintException sql){
+                            Toast.makeText(DetailView.this, "Movie already in favourites", Toast.LENGTH_SHORT).show();
+                        }
                     }
 
                     //If movie is favourite
                     else {
 
-                        Log.d("FAV", "mov is fav false");
+                        //Delete the movie from database
                         mAppdatabase.movieDAO().deleteTask(movie);
+                        finish();
                     }
                 } else {
                     Toast.makeText(DetailView.this, "Error in movie object", Toast.LENGTH_SHORT).show();
                 }
             }
         });
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putParcelable(BUNDLE_STRING, movie);
+        outState.putBoolean(BUNDLE_BOOLEAN, inDb);
+    }
+
+    private void populateUI(Movie movie, boolean test){
+        //Setting the fields with information from the object
+        name.setText(movie.getTitle());
+        String[] splitString = movie.getRelease_date().split("-");
+        year.setText(splitString[0]);
+        String ratingString = "/10";
+        String builder = String.valueOf(movie.getVote_average()) + ratingString;
+        rating.setText(builder);
+
+        if(movie.getOverview().equals(""))
+            plot.setText(R.string.plot);
+        else
+            plot.setText(movie.getOverview());
+
+        //URL for fetching the image
+        String url = "http://image.tmdb.org/t/p/w185";
+
+        //Parse the URL into an URI with parameters
+        Uri uri = Uri.parse(url).buildUpon()
+                .appendEncodedPath(movie.getPoster_path())
+                .build();
+
+        //Use Picasso to fetch the image
+        Picasso.get().load(uri).placeholder(R.drawable.ic_action_movie_error)
+                .error(R.drawable.ic_action_movie_error).into(imagePoster);
+
+        if(movie.isFav()){
+            mFavButton.setText(getString(R.string.rem_fav));
+        }
     }
 
     /**

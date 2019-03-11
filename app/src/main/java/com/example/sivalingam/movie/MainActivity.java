@@ -22,7 +22,10 @@ import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -30,35 +33,43 @@ import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler {
 
+    private static final String POPULAR_SELECTION = "POPULAR";
+    private static final String HIGHEST_SELECTION = "HIGHEST";
+    private static final String FAVORITE_SELECTION = "FAVORITE";
+    private static final String SAVED_SELECTION = "SELECTION";
+
+    private static String selection;
+
     //Variables
     private RecyclerView mRecyclerView;
-    private MovieAdapter mAdapter;
+    private MovieAdapter mAdapter, fAdapter;
     private List<Movie> movieList;
     private ImageView imageView;
     private TextView textView;
     private SwipeRefreshLayout layout;
-    private boolean testForSort;
 
-    //AppDatabase variable
-    private AppDatabase mAppDatabase;
+//    private variable for
+    private AppDatabase appDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        testForSort = true;
+        //set up the view model for favorite movies
+        setUpViewModel();
 
+        //Initialize the movieList array list
         movieList = new ArrayList<>();
+
+        //Initialize the app database instance
+        appDatabase = AppDatabase.getsInstance(this);
 
         //Refer the recycler view from the layout
         mRecyclerView = findViewById(R.id.recycler_id);
         imageView = findViewById(R.id.error_int_id);
         textView = findViewById(R.id.error_message_id);
         layout = findViewById(R.id.refresh_id);
-
-        //Initialize the AppDatabase instance
-        mAppDatabase = AppDatabase.getsInstance(getApplicationContext());
 
         //Grid layout manager
         GridLayoutManager manager = new GridLayoutManager(this, 2, 1, false);
@@ -68,22 +79,56 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
         mRecyclerView.setHasFixedSize(true);
 
+        //Initialize the adapter
+        mAdapter = new MovieAdapter(this);
+
+        //Saved instance state in not null
         if(savedInstanceState != null){
-            if(savedInstanceState.containsKey("MOVIE")){
+
+            /*if(savedInstanceState.containsKey("MOVIE")){
                 imageView.setVisibility(View.INVISIBLE);
                 textView.setVisibility(View.INVISIBLE);
                 movieList.clear();
-                movieList = savedInstanceState.<Movie>getParcelableArrayList("MOVIE");
-                mAdapter = new MovieAdapter(movieList, this);
+                movieList = savedInstanceState.getParcelableArrayList("MOVIE");
                 mRecyclerView.setAdapter(mAdapter);
+            }*/
+
+
+            if(savedInstanceState.containsKey(SAVED_SELECTION)){
+
+
+
+                if(isOnline()){
+                    imageView.setVisibility(View.INVISIBLE);
+                    textView.setVisibility(View.INVISIBLE);
+
+                    if(selection.equals(POPULAR_SELECTION) || selection.equals(HIGHEST_SELECTION)){
+                        fetchData(selection);
+                    } else {
+                        layout.setEnabled(false);
+                    }
+
+                } else {
+                    mRecyclerView.setVisibility(View.INVISIBLE);
+                    imageView.setVisibility(View.VISIBLE);
+                    textView.setVisibility(View.VISIBLE);
+                }
             }
-        } else {
+        }
+
+        //Saved instance state is null
+        else {
+
+            //For the first time specify that the selection is popular
+            selection = POPULAR_SELECTION;
+
             //Check if there is internet connectivity
             if(isOnline()){
                 //We have internet connection
                 imageView.setVisibility(View.INVISIBLE);
                 textView.setVisibility(View.INVISIBLE);
-                fetchData(true);
+
+                fetchData(selection);
             }
             else{
                 //We dont dave internet connection
@@ -102,7 +147,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
                     mRecyclerView.setVisibility(View.VISIBLE);
                     imageView.setVisibility(View.INVISIBLE);
                     textView.setVisibility(View.INVISIBLE);
-                    fetchData(testForSort);
+                    fetchData(selection);
                 } else {
                     layout.setRefreshing(false);
                     mRecyclerView.setVisibility(View.INVISIBLE);
@@ -111,51 +156,47 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
                 }
             }
         });
+    }
 
-        Log.d("LIFECYCLECALLBACK", "ONCREATE");
+    /**
+     * This function is used to initialize the view model so that the observer can listen for changes in the database
+     * and update the UI.
+     */
+    private void setUpViewModel(){
+        final MainViewModel mainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+        mainViewModel.getMovies().observe(this, new Observer<List<Movie>>() {
+            @Override
+            public void onChanged(@Nullable List<Movie> movies) {
+
+                Log.d("testforefficiency", "here1");
+
+                Map<Integer, Integer> intMap = new HashMap<>();
+                //resume is false, hence we need to show the favorite movies
+                if(selection.equals(FAVORITE_SELECTION)){
+
+                    //clear the movie list and add new data to the movie list
+                    movieList.clear();
+                    movieList.addAll(movies);
+
+                    //set the adapter with new data from movie list
+                    mAdapter.setMovieList(movies);
+
+                    //set the adapter for recycler view
+                    mRecyclerView.setAdapter(mAdapter);
+                }
+            }
+        });
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-
-        outState.putParcelableArrayList("MOVIE", new ArrayList<>(movieList));
-
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        Log.d("LIFECYCLECALLBACK", "ONSTART");
+        outState.putString(SAVED_SELECTION, selection);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d("LIFECYCLECALLBACK", "ONRESUME");
-
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        Log.d("LIFECYCLECALLBACK", "ONPAUSE");
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-
-        Log.d("LIFECYCLECALLBACK", "ONSTOP");
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        Log.d("LIFECYCLECALLBACK", "ONDESTROY");
     }
 
     /**
@@ -173,69 +214,62 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
     /**
      *
-     * @param testCondition
+     * @param selection
      *
      * This function is used to fetch the data from the API using the Retrofit library.
      */
-    private void fetchData(boolean testCondition){
-        //If testCondition is true fetch popular movies
-        if(testCondition){
+    private void fetchData(String selection){
+
+        //Initialize the service
+        GetDataService service = RetrofitClientInstance.getRetrofitInstance().create(GetDataService.class);
+        retrofit2.Call<OuterClass> call;
+
+        //If selection is popular
+        if(selection.equals(POPULAR_SELECTION)){
+
+            //set title of action bar as Popular
             ActionBar bar = getSupportActionBar();
             bar.setTitle(R.string.popular);
-
-            //Set the Retrofit instance
-            GetDataService service = RetrofitClientInstance.getRetrofitInstance().create(GetDataService.class);
-
-            //This gets information from the API
-            retrofit2.Call<OuterClass> call = service.getPopularMovies();
-            call.enqueue(new Callback<OuterClass>() {
-                @Override
-                public void onResponse(Call<OuterClass> call, Response<OuterClass> response) {
-                    //The API fetch was successful
-                    try{
-                        movieList = new ArrayList<>();
-                        movieList = response.body().getMovieList();
-                        mAdapter = new MovieAdapter(movieList, MainActivity.this);
-                        mRecyclerView.setAdapter(mAdapter);
-                    } catch(NullPointerException e){
-                        Toast.makeText(MainActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<OuterClass> call, Throwable t) {
-                    //The API fetch was unsuccessful
-                    Toast.makeText(MainActivity.this, "Please try again", Toast.LENGTH_SHORT).show();
-                }
-            });
+            call = service.getPopularMovies();
         }
 
-        //If testCondition is false fetch the top rated movies
+        //else selection is highest rated
         else {
+
+            //set title of action bar as highest rated
             ActionBar bar = getSupportActionBar();
             bar.setTitle(R.string.top);
-            //Set the Retrofit instance
-            GetDataService service = RetrofitClientInstance.getRetrofitInstance().create(GetDataService.class);
-
-            //This gets information from the API
-            retrofit2.Call<OuterClass> call = service.getRatingMovies();
-            call.enqueue(new Callback<OuterClass>() {
-                @Override
-                public void onResponse(Call<OuterClass> call, Response<OuterClass> response) {
-                    //The API fetch was successful
-                    movieList = new ArrayList<>();
-                    movieList = response.body().getMovieList();
-                    mAdapter = new MovieAdapter(movieList, MainActivity.this);
-                    mRecyclerView.setAdapter(mAdapter);
-                }
-
-                @Override
-                public void onFailure(Call<OuterClass> call, Throwable t) {
-                    //The API fetch was unsuccessful
-                    Toast.makeText(MainActivity.this, "Please try again", Toast.LENGTH_SHORT).show();
-                }
-            });
+            call = service.getRatingMovies();
         }
+
+        call.enqueue(new Callback<OuterClass>() {
+            @Override
+            public void onResponse(Call<OuterClass> call, Response<OuterClass> response) {
+                //The API fetch was successful
+                try{
+
+                    //Clear the movie list
+                    movieList.clear();
+
+                    //Copy movie list from response
+                    movieList.addAll(response.body().getMovieList());
+
+                    //give array list with new data to the adapter
+                    mAdapter.setMovieList(movieList);
+
+                    //set the adapter to the recycler view
+                    mRecyclerView.setAdapter(mAdapter);
+                } catch(NullPointerException e){
+                    Toast.makeText(MainActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<OuterClass> call, Throwable t) {
+                //The API fetch was unsuccessful
+                Toast.makeText(MainActivity.this, "Please try again", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     /**
@@ -248,6 +282,29 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu, menu);
+
+        //if selection is not null
+        if(selection != null){
+
+            //Based on the value of selection the menu item will be selected
+            switch (selection){
+                case POPULAR_SELECTION:
+                    MenuItem menuItem = menu.findItem(R.id.action_popularity);
+                    menuItem.setChecked(true);
+                    break;
+
+                case HIGHEST_SELECTION:
+                    MenuItem menuItem1 = menu.findItem(R.id.action_rating);
+                    menuItem1.setChecked(true);
+                    break;
+
+                case FAVORITE_SELECTION:
+                    MenuItem menuItem3 = menu.findItem(R.id.fav_movies);
+                    menuItem3.setChecked(true);
+                    break;
+            }
+        }
+
         return true;
     }
 
@@ -265,12 +322,14 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         switch (id){
             case R.id.action_popularity:
                 item.setChecked(true);
-                testForSort = true;
+                layout.setEnabled(true);
+                selection = POPULAR_SELECTION;
+
                 if(isOnline()){
                     mRecyclerView.setVisibility(View.VISIBLE);
                     imageView.setVisibility(View.INVISIBLE);
                     textView.setVisibility(View.INVISIBLE);
-                    fetchData(true);
+                    fetchData(POPULAR_SELECTION);
                 } else {
                     mRecyclerView.setVisibility(View.INVISIBLE);
                     imageView.setVisibility(View.VISIBLE);
@@ -281,12 +340,16 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
             case R.id.action_rating:
                 item.setChecked(true);
-                testForSort = false;
+                layout.setEnabled(true);
+
+                selection = HIGHEST_SELECTION;
+
                 if(isOnline()){
                     mRecyclerView.setVisibility(View.VISIBLE);
                     imageView.setVisibility(View.INVISIBLE);
                     textView.setVisibility(View.INVISIBLE);
-                    fetchData(false);
+                    fetchData(HIGHEST_SELECTION);
+
                 } else {
                     mRecyclerView.setVisibility(View.INVISIBLE);
                     imageView.setVisibility(View.VISIBLE);
@@ -295,21 +358,14 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
                 return true;
 
             case R.id.fav_movies:
+                ActionBar bar = getSupportActionBar();
+                bar.setTitle(R.string.fav_movies);
                 item.setChecked(true);
+                layout.setEnabled(false);
 
-                MainViewModel mainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
-                mainViewModel.getMovies().observe(this, new Observer<List<Movie>>() {
-                    @Override
-                    public void onChanged(@Nullable List<Movie> movies) {
-                        Log.d("LIVEDATA", "CALLED");
-                        movieList.clear();
-                        movieList = movies;
-                        mAdapter = new MovieAdapter(movieList, MainActivity.this);
-                        mRecyclerView.setAdapter(mAdapter);
-                    }
-                });
+                selection = FAVORITE_SELECTION;
 
-                return true;
+                setUpViewModel();
         }
 
         return super.onOptionsItemSelected(item);

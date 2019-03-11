@@ -17,6 +17,9 @@ public interface MovieDAO {
     @Insert
     void insert(Movie movie);
 
+    @Query("SELECT * FROM movie WHERE id = :id")
+    Movie loadMovieById(int id);
+
     @Delete
     void deleteTask(Movie movie);
 }
