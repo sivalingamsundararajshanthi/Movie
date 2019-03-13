@@ -90,5 +90,12 @@
             android:layout_height="wrap_content"
             tools:text="@string/syno_test" />
 
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/trailerRecyclerViewId"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        </android.support.v7.widget.RecyclerView>
+
     </LinearLayout>
 </ScrollView>

@@ -10,6 +10,8 @@ import android.os.PersistableBundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,6 +21,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class DetailView extends AppCompatActivity {
 
@@ -32,9 +38,12 @@ public class DetailView extends AppCompatActivity {
 
     private boolean inDb;
 
+    private TrailerAdapter mTrailerAdapter;
+
     TextView name, year, rating, plot;
     ImageView imagePoster;
     Button mFavButton;
+    RecyclerView mRecyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +57,15 @@ public class DetailView extends AppCompatActivity {
         plot = findViewById(R.id.synopsis_id);
         imagePoster = findViewById(R.id.movie_poster_id);
         mFavButton = findViewById(R.id.fav_btn_id);
+        mRecyclerView = findViewById(R.id.trailerRecyclerViewId);
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+
+        mRecyclerView.setLayoutManager(layoutManager);
+
+        mRecyclerView.setHasFixedSize(true);
+
+        mTrailerAdapter = new TrailerAdapter();
 
         mAppdatabase = AppDatabase.getsInstance(getApplicationContext());
 
@@ -74,6 +92,9 @@ public class DetailView extends AppCompatActivity {
 
                 }
             }
+
+            fetchData();
+
         } else {
             //Getting the intent
             Intent intent = getIntent();
@@ -94,6 +115,8 @@ public class DetailView extends AppCompatActivity {
                 } catch (NullPointerException e) {
                     Log.d("ERROR", e.getLocalizedMessage());
                 }
+
+                fetchData();
             }
         }
 
@@ -127,6 +150,24 @@ public class DetailView extends AppCompatActivity {
                 } else {
                     Toast.makeText(DetailView.this, "Error in movie object", Toast.LENGTH_SHORT).show();
                 }
+            }
+        });
+    }
+
+    private void fetchData(){
+        GetDataService service = RetrofitClientInstance.getRetrofitInstance().create(GetDataService.class);
+        retrofit2.Call<OuterVideo> call = service.getVideos(movie.getId());
+
+        call.enqueue(new Callback<OuterVideo>() {
+            @Override
+            public void onResponse(Call<OuterVideo> call, Response<OuterVideo> response) {
+                mTrailerAdapter.setVideoList(response.body().getVideoList());
+                mRecyclerView.setAdapter(mTrailerAdapter);
+            }
+
+            @Override
+            public void onFailure(Call<OuterVideo> call, Throwable t) {
+
             }
         });
     }

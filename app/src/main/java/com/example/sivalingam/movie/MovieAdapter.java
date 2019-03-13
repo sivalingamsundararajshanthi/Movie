@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
@@ -45,6 +46,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
     }
 
     public void setMovieList(List<Movie> movieList){
+        Log.d("MOVIELIST", "" + movieList.size());
         this.movieList = movieList;
         notifyDataSetChanged();
     }

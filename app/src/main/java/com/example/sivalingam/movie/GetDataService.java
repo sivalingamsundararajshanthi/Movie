@@ -6,6 +6,8 @@ package com.example.sivalingam.movie;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface GetDataService {
 
@@ -16,4 +18,8 @@ public interface GetDataService {
     //This interface method fetches the top rated movies
     @GET("/3/movie/top_rated?api_key=")
     Call<OuterClass> getRatingMovies();
+
+    //This interface method is used to fetch trailers of the selected movie
+    @GET("/3/movie/{id}/videos?api_key=")
+    Call<OuterVideo> getVideos(@Path("id") int id);
 }

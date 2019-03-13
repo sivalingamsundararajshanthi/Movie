@@ -95,9 +95,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
 
             if(savedInstanceState.containsKey(SAVED_SELECTION)){
-
-
-
                 if(isOnline()){
                     imageView.setVisibility(View.INVISIBLE);
                     textView.setVisibility(View.INVISIBLE);
@@ -168,9 +165,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
             @Override
             public void onChanged(@Nullable List<Movie> movies) {
 
-                Log.d("testforefficiency", "here1");
-
-                Map<Integer, Integer> intMap = new HashMap<>();
                 //resume is false, hence we need to show the favorite movies
                 if(selection.equals(FAVORITE_SELECTION)){
 
