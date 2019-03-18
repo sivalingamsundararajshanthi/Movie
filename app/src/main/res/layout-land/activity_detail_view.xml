@@ -13,13 +13,11 @@
         android:orientation="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-
         <ImageView
             android:id="@+id/movie_poster_id"
-            android:layout_width="170dp"
-            android:layout_height="240dp"
+            android:layout_width="203dp"
+            android:layout_height="261dp"
             android:layout_marginStart="16dp"
-
             android:layout_marginLeft="16dp"
             android:layout_marginTop="16dp"
             android:layout_weight="1"
@@ -27,20 +25,15 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:background="@drawable/ic_launcher_background" />
 
-
         <TextView
             android:id="@+id/year_id"
             android:layout_width="150dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="160dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="164dp"
             android:gravity="center"
             android:textSize="50sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.203"
             app:layout_constraintStart_toEndOf="@+id/movie_poster_id"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="2015" />
@@ -51,7 +44,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="40dp"
             android:layout_marginLeft="40dp"
-            android:layout_marginTop="88dp"
+            android:layout_marginTop="68dp"
             android:textSize="35sp"
             app:layout_constraintStart_toEndOf="@+id/movie_poster_id"
             app:layout_constraintTop_toTopOf="parent"
@@ -61,38 +54,38 @@
             android:id="@+id/fav_btn_id"
             android:layout_width="150dp"
             android:layout_height="80dp"
-            android:layout_marginStart="24dp"
-            android:layout_marginLeft="24dp"
-            android:layout_marginTop="284dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="48dp"
             android:text="@string/fav"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/rating_id"
             app:layout_constraintTop_toTopOf="parent" />
 
 
         <TextView
             android:id="@+id/synopsis_id"
-            android:layout_width="362dp"
+            android:layout_width="690dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginLeft="10dp"
-            android:layout_marginTop="392dp"
+            android:layout_marginTop="312dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.52"
+            app:layout_constraintHorizontal_bias="0.406"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="@string/syno_test" />
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/trailerRecyclerViewId"
-            android:layout_width="370dp"
-            android:layout_height="wrap_content"
+            android:layout_width="691dp"
+            android:layout_height="match_parent"
             android:layout_marginStart="8dp"
             android:layout_marginLeft="8dp"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="32dp"
             android:layout_marginEnd="8dp"
             android:layout_marginRight="8dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.56"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/synopsis_id">
 
@@ -102,11 +95,13 @@
             android:id="@+id/reviewBtnId"
             android:layout_width="150dp"
             android:layout_height="80dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="284dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="168dp"
             android:text="@string/review_btn_string"
-            app:layout_constraintStart_toEndOf="@+id/fav_btn_id"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.437"
+            app:layout_constraintStart_toEndOf="@+id/year_id"
             app:layout_constraintTop_toTopOf="parent" />
 
     </android.support.constraint.ConstraintLayout>

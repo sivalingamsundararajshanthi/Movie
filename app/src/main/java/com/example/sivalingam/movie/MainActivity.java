@@ -254,6 +254,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
                     //set the adapter to the recycler view
                     mRecyclerView.setAdapter(mAdapter);
                 } catch(NullPointerException e){
+                    Log.d("NullPointerException", "NullPointerException");
                     Toast.makeText(MainActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                 }
             }

@@ -26,7 +26,8 @@
         android:layout_height="100dp"
         android:background="@drawable/ic_action_movie_error"
         android:layout_marginTop="190dp"
-        android:layout_marginLeft="150dp"/>
+        android:layout_marginLeft="150dp"
+        android:layout_marginStart="150dp"/>
 
     <TextView
         android:id="@+id/error_message_id"

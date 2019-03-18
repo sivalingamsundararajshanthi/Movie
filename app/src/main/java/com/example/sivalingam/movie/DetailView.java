@@ -2,12 +2,14 @@ package com.example.sivalingam.movie;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.sqlite.SQLiteConstraintException;
 import android.net.Uri;
-import android.os.PersistableBundle;
-import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -22,28 +24,31 @@ import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class DetailView extends AppCompatActivity {
+public class DetailView extends AppCompatActivity implements TrailerAdapter.TrailerAdapterOnClickHandler {
 
     private final String BUNDLE_STRING = "MOVIEOBJECT";
-    private final String BUNDLE_BOOLEAN = "BOOLEANDB";
 
     //Member variable for the database
     private AppDatabase mAppdatabase;
 
     private Movie movie;
 
-    private boolean inDb;
-
     private TrailerAdapter mTrailerAdapter;
 
-    TextView name, year, rating, plot;
+    TextView year, rating, plot;
     ImageView imagePoster;
-    Button mFavButton;
+    Button mFavButton, mReviewButton;
     RecyclerView mRecyclerView;
+
+    private List<Video> videoList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,13 +56,15 @@ public class DetailView extends AppCompatActivity {
         setContentView(R.layout.activity_detail_view);
 
         //variables
-        name = findViewById(R.id.moview_name_id);
         year = findViewById(R.id.year_id);
         rating = findViewById(R.id.rating_id);
         plot = findViewById(R.id.synopsis_id);
         imagePoster = findViewById(R.id.movie_poster_id);
         mFavButton = findViewById(R.id.fav_btn_id);
         mRecyclerView = findViewById(R.id.trailerRecyclerViewId);
+        mReviewButton = findViewById(R.id.reviewBtnId);
+
+        videoList = new ArrayList<>();
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
 
@@ -65,7 +72,7 @@ public class DetailView extends AppCompatActivity {
 
         mRecyclerView.setHasFixedSize(true);
 
-        mTrailerAdapter = new TrailerAdapter();
+        mTrailerAdapter = new TrailerAdapter(this);
 
         mAppdatabase = AppDatabase.getsInstance(getApplicationContext());
 
@@ -74,27 +81,14 @@ public class DetailView extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         if(savedInstanceState != null){
-
-            Log.d("bothtrue", "saved");
-
             if(savedInstanceState.containsKey(BUNDLE_STRING)){
-
-                Log.d("bothtrue", "bothtrue");
-
                 try{
                     movie = savedInstanceState.getParcelable(BUNDLE_STRING);
-                    populateUI(movie,
-                            savedInstanceState.getBoolean(BUNDLE_BOOLEAN));
-
+                    populateUI(movie);
                 } catch (NullPointerException npe) {
-
                     Log.d("ISNULL", "NULL");
-
                 }
             }
-
-            fetchData();
-
         } else {
             //Getting the intent
             Intent intent = getIntent();
@@ -105,18 +99,25 @@ public class DetailView extends AppCompatActivity {
                 //get the movie object from the main activity
                 movie = intent.getParcelableExtra("MOVIEOBJECTPOSITION");
 
-                if(mAppdatabase.movieDAO().loadMovieById(movie.getId()) != null){
-                    inDb = true;
-                    movie.setFav(true);
-                }
+                AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(mAppdatabase.movieDAO().loadMovieById(movie.getId()) != null){
+                            movie.setFav(true);
+                        }
 
-                try {
-                    populateUI(movie, inDb);
-                } catch (NullPointerException e) {
-                    Log.d("ERROR", e.getLocalizedMessage());
-                }
-
-                fetchData();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    populateUI(movie);
+                                } catch (NullPointerException e) {
+                                    Log.d("ERROR", e.getLocalizedMessage());
+                                }
+                            }
+                        });
+                    }
+                });
             }
         }
 
@@ -127,31 +128,72 @@ public class DetailView extends AppCompatActivity {
 
                 //If movie object is not null
                 if(movie != null){
-
-                    //If movie is not favourite
-                    if(mAppdatabase.movieDAO().loadMovieById(movie.getId()) == null){
-                        movie.setFav(true);
-
-                        try{
-                            mAppdatabase.movieDAO().insert(movie);
-                            finish();
-                        } catch(SQLiteConstraintException sql){
-                            Toast.makeText(DetailView.this, "Movie already in favourites", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-
-                    //If movie is favourite
-                    else {
-
-                        //Delete the movie from database
-                        mAppdatabase.movieDAO().deleteTask(movie);
-                        finish();
-                    }
+                    addOrDeleteMovie();
                 } else {
                     Toast.makeText(DetailView.this, "Error in movie object", Toast.LENGTH_SHORT).show();
                 }
             }
         });
+
+        //onClickListener for read reviews button
+        mReviewButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(DetailView.this, ReviewActivity.class);
+
+                //We pass the movie id
+                intent.putExtra("MOVIEIDREVIEW", movie.getId());
+                startActivity(intent);
+            }
+        });
+    }
+
+    private void addOrDeleteMovie(){
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                if(movie.isFav()){
+                    movie.setFav(false);
+                    mAppdatabase.movieDAO().deleteTask(movie);
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mFavButton.setText(getString(R.string.fav));
+                        }
+                    });
+                } else {
+                    movie.setFav(true);
+                    mAppdatabase.movieDAO().insert(movie);
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mFavButton.setText(getString(R.string.rem_fav));
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    /**
+     *
+     * @param id
+     *
+     * This overriden function is used to open the youtube or web browser.
+     */
+    @Override
+    public void onClick(int id) {
+        Video video = videoList.get(id);
+        Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + video.getKey()));
+        Intent webIntent = new Intent(Intent.ACTION_VIEW,
+                Uri.parse("http://www.youtube.com/watch?v=" + video.getKey()));
+        try {
+            this.startActivity(appIntent);
+        } catch (ActivityNotFoundException ex) {
+            this.startActivity(webIntent);
+        }
     }
 
     private void fetchData(){
@@ -161,6 +203,9 @@ public class DetailView extends AppCompatActivity {
         call.enqueue(new Callback<OuterVideo>() {
             @Override
             public void onResponse(Call<OuterVideo> call, Response<OuterVideo> response) {
+
+                videoList.clear();
+                videoList.addAll(response.body().getVideoList());
                 mTrailerAdapter.setVideoList(response.body().getVideoList());
                 mRecyclerView.setAdapter(mTrailerAdapter);
             }
@@ -177,12 +222,18 @@ public class DetailView extends AppCompatActivity {
         super.onSaveInstanceState(outState);
 
         outState.putParcelable(BUNDLE_STRING, movie);
-        outState.putBoolean(BUNDLE_BOOLEAN, inDb);
     }
 
-    private void populateUI(Movie movie, boolean test){
+    private void populateUI(Movie movie){
         //Setting the fields with information from the object
-        name.setText(movie.getTitle());
+
+        try{
+            ActionBar bar = getSupportActionBar();
+            bar.setTitle(movie.getTitle());
+        } catch (NullPointerException npe){
+            Log.d("NullPointerException", "NullPointerException");
+        }
+
         String[] splitString = movie.getRelease_date().split("-");
         year.setText(splitString[0]);
         String ratingString = "/10";
@@ -209,6 +260,52 @@ public class DetailView extends AppCompatActivity {
         if(movie.isFav()){
             mFavButton.setText(getString(R.string.rem_fav));
         }
+
+        if(isOnline()){
+            fetchData();
+        } else {
+            showSnackBar();
+        }
+    }
+
+    private void showSnackBar(){
+        View view = findViewById(R.id.reviewButtonId);
+
+        String str = "error";
+
+        final Snackbar snackbar = Snackbar.make(view, str, Snackbar.LENGTH_INDEFINITE);
+
+        snackbar.setAction("Try again", new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(isOnline()){
+                    fetchData();
+                } else {
+                    showSnackBar();
+                }
+            }
+        });
+
+        snackbar.show();
+    }
+
+    /**
+     *
+     * @return
+     *
+     * This function returns true if internet is available or false if internet is not available
+     */
+    private boolean isOnline() {
+        Runtime runtime = Runtime.getRuntime();
+        try {
+            Process ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8");
+            int     exitValue = ipProcess.waitFor();
+            return (exitValue == 0);
+        }
+        catch (IOException e)          { e.printStackTrace(); }
+        catch (InterruptedException e) { e.printStackTrace(); }
+
+        return false;
     }
 
     /**

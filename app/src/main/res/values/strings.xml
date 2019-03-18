@@ -16,4 +16,6 @@
     <string name="fav">Make Favourite</string>
     <string name="fav_movies">Favourite Movies</string>
     <string name="rem_fav">Remove Favourite</string>
+    <string name="play_string">Play </string>
+    <string name="review_btn_string">Read Reviews</string>
 </resources>

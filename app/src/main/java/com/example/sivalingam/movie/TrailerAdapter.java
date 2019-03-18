@@ -1,6 +1,9 @@
 package com.example.sivalingam.movie;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -15,8 +18,24 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerA
     //list of video objects
     private List<Video> videoList;
 
-    public TrailerAdapter(){
+    private int trailerNum = 0;
+    private int teaserNum = 0;
+    private int clipNum = 0;
+    private int featuretteNum = 0;
 
+    private final String TRAILER = "Trailer";
+    private final String TEASER = "Teaser";
+    private final String CLIP = "Clip";
+    private final String FEATURETTE = "Featurette";
+
+    private final TrailerAdapterOnClickHandler handler;
+
+    public interface TrailerAdapterOnClickHandler{
+        void onClick(int id);
+    }
+
+    public TrailerAdapter(TrailerAdapterOnClickHandler handler){
+        this.handler = handler;
     }
 
     public void setVideoList(List<Video> videoList){
@@ -56,7 +75,24 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerA
 
         //If the videoList is not null
         if(videoList != null){
-            trailerAdapterViewHolder.mTextView.setText(videoList.get(i).getType());
+
+            String play;
+
+            if(videoList.get(i).getType().equals(TRAILER)){
+                trailerNum++;
+                play = "Play " + videoList.get(i).getType() + " " + String.valueOf(trailerNum);
+            } else if(videoList.get(i).getType().equals(TEASER)){
+                teaserNum++;
+                play = "Play " + videoList.get(i).getType() + " " + String.valueOf(teaserNum);
+            } else if(videoList.get(i).getType().equals(CLIP)){
+                clipNum++;
+                play = "Play " + videoList.get(i).getType() + " " + String.valueOf(clipNum);
+            } else {
+                featuretteNum++;
+                play = "Play " + videoList.get(i).getType() + " " + String.valueOf(featuretteNum);
+            }
+
+            trailerAdapterViewHolder.mTextView.setText(play);
         }
     }
 
@@ -74,7 +110,7 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerA
             return 0;
     }
 
-    public class TrailerAdapterViewHolder extends RecyclerView.ViewHolder {
+    public class TrailerAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private final TextView mTextView;
 
@@ -82,6 +118,13 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerA
             super(itemView);
 
             mTextView = itemView.findViewById(R.id.trailerId);
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            int adapterPosition = getAdapterPosition();
+            handler.onClick(adapterPosition);
         }
     }
 }
