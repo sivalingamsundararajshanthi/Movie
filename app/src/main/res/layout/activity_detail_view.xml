@@ -19,14 +19,12 @@
             android:layout_width="170dp"
             android:layout_height="240dp"
             android:layout_marginStart="16dp"
-
             android:layout_marginLeft="16dp"
             android:layout_marginTop="16dp"
             android:layout_weight="1"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:background="@drawable/ic_launcher_background" />
-
 
         <TextView
             android:id="@+id/year_id"
@@ -92,7 +90,7 @@
             android:layout_marginEnd="8dp"
             android:layout_marginRight="8dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.56"
+            app:layout_constraintHorizontal_bias="0.64"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/synopsis_id">
 
@@ -108,6 +106,36 @@
             android:text="@string/review_btn_string"
             app:layout_constraintStart_toEndOf="@+id/fav_btn_id"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/detail_error_tv_id"
+            android:gravity="center"
+            android:layout_width="272dp"
+            android:layout_height="35dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:text="@string/error_message"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.495"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/synopsis_id" />
+
+        <Button
+            android:id="@+id/detail_error_btn_id"
+            android:text="@string/error_btn_detail"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/detail_error_tv_id" />
 
     </android.support.constraint.ConstraintLayout>
 </ScrollView>

@@ -11,8 +11,7 @@ import android.util.Log;
 import java.util.List;
 
 /**
- * This class makes a call to the FetchData class and calls fetchData method inside that class and gets a mutable live
- * data.
+ * This class is not used
  */
 public class AddMovieViewModel extends ViewModel {
 

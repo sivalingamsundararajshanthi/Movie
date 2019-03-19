@@ -8,6 +8,9 @@ import android.util.Log;
 
 import java.util.List;
 
+/**
+ * This class is used to initialize the view model.
+ */
 public class MainViewModel extends AndroidViewModel {
 
     private LiveData<List<Movie>> movies;
@@ -16,7 +19,7 @@ public class MainViewModel extends AndroidViewModel {
     public MainViewModel(@NonNull Application application) {
         super(application);
 
-        Log.d("testforefficiency", "here");
+        Log.d("CHECKFOR", "here");
 
         AppDatabase database = AppDatabase.getsInstance(this.getApplication());
         movies = database.movieDAO().getAllMovies();

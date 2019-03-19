@@ -13,31 +13,41 @@ import android.widget.TextView;
 
 import java.util.List;
 
+/**
+ * This is the adapter for the trailer recycler view. This adapter also has an inner class which extends the view holder class.
+ */
+
 public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerAdapterViewHolder> {
 
     //list of video objects
     private List<Video> videoList;
 
-    private int trailerNum = 0;
-    private int teaserNum = 0;
-    private int clipNum = 0;
-    private int featuretteNum = 0;
-
-    private final String TRAILER = "Trailer";
-    private final String TEASER = "Teaser";
-    private final String CLIP = "Clip";
-    private final String FEATURETTE = "Featurette";
-
+    //handler for the particular view
     private final TrailerAdapterOnClickHandler handler;
 
+    /**
+     * Interface to handle click handling
+     */
     public interface TrailerAdapterOnClickHandler{
         void onClick(int id);
     }
 
+    /**
+     *
+     * @param handler
+     *
+     * This is the constructor for TrailerAdapter and it sets the onClick handler
+     */
     public TrailerAdapter(TrailerAdapterOnClickHandler handler){
         this.handler = handler;
     }
 
+    /**
+     *
+     * @param videoList
+     *
+     * This method is used to set the video list and tell the adapter that the data has changed
+     */
     public void setVideoList(List<Video> videoList){
         this.videoList = videoList;
         notifyDataSetChanged();
@@ -76,23 +86,9 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerA
         //If the videoList is not null
         if(videoList != null){
 
-            String play;
+            String play = "Play ";
 
-            if(videoList.get(i).getType().equals(TRAILER)){
-                trailerNum++;
-                play = "Play " + videoList.get(i).getType() + " " + String.valueOf(trailerNum);
-            } else if(videoList.get(i).getType().equals(TEASER)){
-                teaserNum++;
-                play = "Play " + videoList.get(i).getType() + " " + String.valueOf(teaserNum);
-            } else if(videoList.get(i).getType().equals(CLIP)){
-                clipNum++;
-                play = "Play " + videoList.get(i).getType() + " " + String.valueOf(clipNum);
-            } else {
-                featuretteNum++;
-                play = "Play " + videoList.get(i).getType() + " " + String.valueOf(featuretteNum);
-            }
-
-            trailerAdapterViewHolder.mTextView.setText(play);
+            trailerAdapterViewHolder.mTextView.setText(String.format("%s%s", play, videoList.get(i).getType()));
         }
     }
 
@@ -100,7 +96,7 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerA
      *
      * @return int
      *
-     * This method size of videoList
+     * This method returns the size of videoList
      */
     @Override
     public int getItemCount() {
@@ -110,17 +106,29 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerA
             return 0;
     }
 
+    /**
+     * This inner class extends from the view holder class and is used to reference the layout item.
+     */
     public class TrailerAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
+        //The text view in the layout
         private final TextView mTextView;
 
+        //This constructor is used to refer the text view from the layout
         public TrailerAdapterViewHolder(@NonNull View itemView) {
             super(itemView);
 
+            //Refer the textview from the layout
             mTextView = itemView.findViewById(R.id.trailerId);
             itemView.setOnClickListener(this);
         }
 
+        /**
+         *
+         * @param v
+         *
+         * This overriden method is used to get video url from the clicked video object.
+         */
         @Override
         public void onClick(View v) {
             int adapterPosition = getAdapterPosition();

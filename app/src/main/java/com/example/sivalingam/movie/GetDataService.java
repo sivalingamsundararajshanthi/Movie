@@ -22,6 +22,7 @@ public interface GetDataService {
     @GET("/3/movie/{id}/videos?api_key=")
     Call<OuterVideo> getVideos(@Path("id") int id);
 
+    //This interface method is used to fetch reviews of the selected movie
     @GET("/3/movie/{id}/reviews?api_key=")
     Call<OuterReview> getReviews(@Path("id") int id);
 }

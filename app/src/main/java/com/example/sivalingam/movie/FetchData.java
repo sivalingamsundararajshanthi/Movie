@@ -12,7 +12,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
- * This call is used for getting the data from the API.
+ * This class is not used
  */
 
 public class FetchData {

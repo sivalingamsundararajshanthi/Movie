@@ -18,4 +18,6 @@
     <string name="rem_fav">Remove Favourite</string>
     <string name="play_string">Play </string>
     <string name="review_btn_string">Read Reviews</string>
+    <string name="error_btn_detail">Try again</string>
+    <string name="no_video_available">No video</string>
 </resources>

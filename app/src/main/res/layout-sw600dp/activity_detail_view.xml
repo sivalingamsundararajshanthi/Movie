@@ -13,7 +13,6 @@
         android:orientation="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-
         <ImageView
             android:id="@+id/movie_poster_id"
             android:layout_width="203dp"
@@ -26,7 +25,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:background="@drawable/ic_launcher_background" />
-
 
         <TextView
             android:id="@+id/year_id"
@@ -63,7 +61,6 @@
             android:text="@string/fav"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-
 
         <TextView
             android:id="@+id/synopsis_id"

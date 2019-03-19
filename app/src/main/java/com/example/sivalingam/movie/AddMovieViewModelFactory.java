@@ -5,6 +5,9 @@ import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
+/**
+ * This class is not used
+ */
 public class AddMovieViewModelFactory extends ViewModelProvider.NewInstanceFactory {
 
     private AppDatabase mAppDatabase;

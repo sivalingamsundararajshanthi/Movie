@@ -6,7 +6,6 @@
     android:layout_height="wrap_content"
     android:padding="0dp"
     android:scaleType="fitXY"
-
     android:contentDescription="@string/image_button_text">
 
 </ImageButton>

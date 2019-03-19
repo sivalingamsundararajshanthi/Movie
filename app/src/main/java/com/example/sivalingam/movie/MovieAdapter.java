@@ -38,13 +38,18 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
      *
      * @param
      *
-     * This constructor is used to set the movieList, also to refresh the recycler view when the data set changes
-     * and also sets the onClick handler
+     * This is the constructor for the movie adapter and it sets the onClick handler
      */
     public MovieAdapter(MovieAdapterOnClickHandler handler){
         this.handler = handler;
     }
 
+    /**
+     *
+     * @param movieList
+     *
+     * This method is used to set the movie list and notify the adapter that the data has changed
+     */
     public void setMovieList(List<Movie> movieList){
         Log.d("MOVIELIST", "" + movieList.size());
         this.movieList = movieList;

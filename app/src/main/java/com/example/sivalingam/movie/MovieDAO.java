@@ -8,6 +8,9 @@ import android.arch.persistence.room.Query;
 
 import java.util.List;
 
+/**
+ * This class is used to specify all the queries.
+ */
 @Dao
 public interface MovieDAO {
 

@@ -14,6 +14,9 @@ import android.view.MenuItem;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class is not used
+ */
 public class FavouriteActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler {
 
     //private variables
