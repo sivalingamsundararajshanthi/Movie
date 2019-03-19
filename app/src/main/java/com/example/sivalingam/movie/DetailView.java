@@ -413,7 +413,7 @@ public class DetailView extends AppCompatActivity implements TrailerAdapter.Trai
     }
 
     /**
-     * This function is used to show snack bar with an error message telling the user to try again option.
+     * This function is not used.
      */
     private void showSnackBar(){
         View view = findViewById(R.id.reviewButtonId);
